@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profesight – Faculty Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#EFE4D2;--surf:#FBF6EC;--ink:#2E2A27;--mut:#6B6258;--line:#DCC9AB;--red:#c8322f;--redd:#a52a28;--ok:#1f9d8a;--warn:#c98a12;--bad:#c8322f;--tint:#fdeeea;--gray:#C9B79A;--accent:#1F2F55;--accent-tint:#E3E7F0;--g-grades:#1F2F55;--g-grades-tint:#E3E7F0;--g-sete:#5B5B33;--g-sete-tint:#ECE9D6;--g-sete-chart:#8A8A5A;--brand:#A8482A;--brand-tint:#F3E0D2;--sand-deep:#E6D5BA;--shadow:rgba(46,42,39,.10);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Poppins",system-ui,sans-serif}
+header{background:var(--surf);color:var(--ink);border-bottom:3px solid var(--brand);box-shadow:0 1px 0 var(--line);padding:16px 24px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.brand>div{min-width:0}
+.brand h1{font:700 22px "Poppins",system-ui,sans-serif;margin:0;line-height:1.1}
+.brand small{display:block;opacity:.85}
+.who{text-align:right;font-size:14px}.who b{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:16px}
+.filters{display:flex;flex-wrap:wrap;gap:16px;padding:16px 24px;background:var(--bg)}
+.filters label{display:flex;flex-direction:column;font-size:13px;color:var(--mut);gap:4px}
+.filter-label{display:flex;align-items:center;gap:6px}
+select{font:inherit;color:var(--ink);background:var(--surf);border:1px solid var(--line);border-radius:999px;padding:8px 12px;min-width:150px}
+select,.back,.btn,.mode-switch button,.picker button{transition:transform .18s cubic-bezier(.2,.7,.25,1),opacity .18s cubic-bezier(.2,.7,.25,1)}
+select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+main{max-width:1280px;margin:0 auto;padding:20px 24px 28px;display:grid;gap:16px}
+h2{font:600 16px "Poppins",system-ui,sans-serif;margin:0 0 4px}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 2px 10px var(--shadow)}
+.card h2::after,.card h3::after{content:"";display:block;width:28px;height:3px;border-radius:2px;background:var(--brand);margin-top:6px}
+.alerts{border:1px solid var(--line);border-left:4px solid var(--red);background:var(--surf)}
+.alerts ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.alerts li{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#alerts.swap{animation:swap-in .16s cubic-bezier(.2,.7,.25,1) both}
+.alert-badge{display:inline-grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border-radius:8px;background:var(--surf);color:var(--bad)}
+.alert-badge.warn{background:#fff4d8;color:var(--warn)}.alert-badge.ok{background:#e1f3ef;color:var(--ok)}
+.g{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin:0 0 6px}
+.g-chip{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:3px 8px;border-radius:999px;background:var(--group-tint, var(--tint));color:var(--group-color, var(--mut));border:1px solid var(--group-color, var(--mut));font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:4px;padding:1px 7px;border:1px solid currentColor;white-space:nowrap}
+.tag.bad{color:var(--bad)}.tag.warn{color:var(--warn)}.tag.ok{color:var(--ok)}.tag.na{color:var(--mut)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+.kpi{all:unset;position:relative;box-sizing:border-box;font:inherit;cursor:pointer;background:var(--surf);border:1px solid var(--line);border-left:4px solid var(--mut);border-radius:16px;padding:18px;display:grid;gap:8px;box-shadow:0 2px 10px var(--shadow);transition:transform .16s cubic-bezier(.2,.7,.25,1)}
+.kpi:hover{transform:translateY(-2px)}
+.kpi.ok{border-left-color:var(--ok)}.kpi.warn{border-left-color:var(--warn)}.kpi.bad{border-left-color:var(--bad)}
+.kpi{--flash:var(--mut)}
+.kpi.ok{--flash:var(--ok)}.kpi.warn{--flash:var(--warn)}.kpi.bad{--flash:var(--bad)}
+.kpi::after{content:"";position:absolute;inset:-3px;border:2px solid var(--flash);border-radius:19px;opacity:0;pointer-events:none}
+.kpi.status-changed::after{animation:status-flash .7s ease-out 1}
+.kpi[aria-pressed="true"]{background:var(--sand-deep);box-shadow:0 0 0 2px var(--accent)}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.kpi-icon{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--group-tint, var(--tint));color:var(--group-color, var(--mut));}
+.kpi .n{font-size:13px;color:var(--mut)}
+.kpi .v{font:600 30px/1.1 "Poppins",system-ui,sans-serif}
+.kpi .s{font-size:13px;font-weight:400;color:var(--mut)}
+.kpi-more{display:inline-flex;align-items:center;gap:4px;color:var(--mut);font-size:12px;font-weight:600;margin-top:4px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+.card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.card-icon{display:inline-grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:var(--group-tint, var(--accent-tint));color:var(--group-color, var(--accent))}
+.card-title{flex:1;min-width:0}
+.card-title h2{margin:0}
+.chart{position:relative;height:270px;margin-top:8px}
+.sub{font-size:13px;font-weight:400;color:var(--mut);margin:0}
+.drawer-body table{width:100%;border-collapse:collapse;margin-top:8px}
+.drawer-body th,.drawer-body td{text-align:left;padding:8px;border-bottom:1px solid var(--line);font-size:14px}
+.drawer-body th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.detail-row{cursor:pointer}
+.detail-row:hover{background:var(--sand-deep)}
+.detail-row:focus-visible{background:var(--sand-deep);outline:2px solid var(--accent);outline-offset:-2px}
+.detail-row td:last-child{text-align:right;color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.detail-toolbar{display:grid;gap:12px;margin:12px 0 16px}
+.mode-switch{display:inline-flex;width:max-content;padding:4px;gap:4px;border:1px solid var(--line);border-radius:12px;background:var(--sand-deep)}
+.mode-switch button,.picker button{font:inherit;cursor:pointer}
+.mode-switch button{border:0;border-radius:8px;padding:8px 12px;background:transparent;color:var(--mut);font-weight:600}
+.mode-switch button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.mode-switch button:hover,.picker button:hover{transform:translateY(-1px)}
+.picker{display:flex;flex-wrap:wrap;gap:8px}
+.picker button{border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--surf);color:var(--ink);font-size:12px;transition:transform .18s cubic-bezier(.2,.7,.25,1),opacity .18s cubic-bezier(.2,.7,.25,1)}
+.picker button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.detail-heading{display:flex;align-items:center;gap:8px}
+.drawer-content.detail-fade{animation:content-enter .22s cubic-bezier(.2,.7,.25,1) both}
+.drawer-content.detail-from-right{animation:detail-from-right .22s cubic-bezier(.2,.7,.25,1) both}
+.drawer-content.detail-from-left{animation:detail-from-left .22s cubic-bezier(.2,.7,.25,1) both}
+.detail-heading .card-icon{--group-tint:var(--accent-tint);--group-color:var(--accent)}
+.detail-heading-copy{min-width:0}
+.detail-empty{color:var(--mut);font-size:13px}
+.risk-rows{display:grid;gap:8px;margin:12px 0}
+.risk-row{width:100%;display:grid;grid-template-columns:minmax(150px,1fr) auto auto;gap:8px 12px;align-items:center;text-align:left;font:inherit;color:var(--ink);background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:12px;transition:transform .18s cubic-bezier(.2,.7,.25,1)}
+.risk-row:hover{background:var(--sand-deep);border-color:var(--accent);transform:translateY(-1px)}
+.risk-meter{grid-column:1/-1;height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.risk-meter i{display:block;width:100%;height:100%;border-radius:3px;transform-origin:left center;transform:scaleX(var(--s,0));transition:transform .4s cubic-bezier(.2,.7,.25,1)}
+.risk-row .tag.bad~.risk-meter i{background:var(--bad)}
+.risk-row .tag.warn~.risk-meter i{background:var(--warn)}
+.risk-row .tag.ok~.risk-meter i{background:var(--ok)}
+.risk-row-name{font-weight:600}
+.risk-row-about{font-weight:600;white-space:nowrap}
+.risk-row-drivers,.risk-row-notes,.risk-row-action{grid-column:1/-1;font-size:13px;font-weight:400;color:var(--mut)}
+.risk-row-action{grid-column:1/3;color:var(--ink)}
+.risk-row-chevron{grid-column:3;justify-self:end;display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--accent)}
+.risk-footer{font-size:13px;color:var(--mut);margin:12px 0}
+.risk-disclosure{font-size:13px;color:var(--mut)}
+.risk-disclosure summary{cursor:pointer;color:var(--ink);font-weight:600}
+.risk-disclosure p{margin:8px 0 0}
+.risk-empty{font-size:14px;color:var(--mut);margin:12px 0}
+.risk-card-head{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:start;gap:8px}
+.risk-card-heading{min-width:0}
+.risk-card-heading h2{margin-bottom:2px}
+.risk-card-heading .sub{line-height:1.4}
+.risk-sete-helper{font-size:12px;color:var(--mut);margin:6px 0 0}
+.risk-sete-switch{display:inline-flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;color:var(--ink);font:500 13px "Poppins",system-ui,sans-serif;cursor:pointer}
+.switch-track{position:relative;display:block;flex:0 0 36px;width:36px;height:20px;border-radius:999px;background:var(--line);transition:background .15s ease}
+.switch-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s ease}
+.risk-sete-switch[aria-checked="true"] .switch-track{background:var(--accent)}
+.risk-sete-switch[aria-checked="true"] .switch-thumb{transform:translateX(16px)}
+.risk-sete-switch:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.privacy-strip{display:flex;align-items:center;gap:18px;padding:14px 18px;background:var(--surf);border:1px solid var(--line);border-radius:16px}
+.privacy-strip-title{display:flex;align-items:center;gap:10px;flex:0 0 auto;font-size:15px;font-weight:600}
+.privacy-strip-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:var(--accent-tint);color:var(--accent)}
+.privacy-strip-icon svg{width:18px;height:18px}
+.privacy-strip-items{display:flex;flex:1;align-items:center;justify-content:space-between;gap:20px}
+.privacy-strip-item{display:flex;align-items:center;gap:7px;min-width:0;color:var(--mut);font-size:13px}
+.privacy-strip-item svg{flex:0 0 16px;width:16px;height:16px;color:var(--accent)}
+@media (max-width:820px){.privacy-strip{align-items:flex-start;flex-wrap:wrap;gap:12px}.privacy-strip-items{flex-basis:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px}}
+@media (max-width:560px){.risk-card-head{grid-template-columns:32px minmax(0,1fr)}.risk-sete-switch{grid-column:2;justify-self:start}.privacy-strip-items{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.switch-track,.switch-thumb{transition:none!important}}
+.drawer-open{overflow:hidden}
+.scrim{position:fixed;inset:0;z-index:100;background:rgba(31,47,85,.25);opacity:0;transition:opacity .2s ease-out}
+.scrim.open{opacity:1}
+.drawer{position:fixed;z-index:101;top:0;right:0;width:440px;max-width:92vw;height:100dvh;background:var(--surf);border-left:1px solid var(--line);box-shadow:0 0 32px rgba(31,47,85,.18);transform:translateX(100%);transition:transform .2s ease-out;display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer[hidden],.scrim[hidden]{display:none}
+.drawer-head{display:flex;align-items:center;gap:10px;padding:20px;border-bottom:1px solid var(--line)}
+.drawer-head .card-icon{flex:0 0 32px}
+.drawer-title{flex:1;min-width:0}
+.drawer-title h2{margin:0}
+.drawer-title .sub{margin-top:3px}
+.drawer-close{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--surf);color:var(--ink);cursor:pointer}
+.drawer-body{overflow:auto;padding:20px;overscroll-behavior:contain}
+@media (max-width:560px){.drawer{width:100%;max-width:100%}}
+@media (prefers-reduced-motion:reduce){.drawer,.scrim{transition:none}}
+@media (max-width:560px){.risk-row{grid-template-columns:minmax(0,1fr) auto}.risk-row-name{grid-column:1}.risk-row .tag{grid-column:1}.risk-row-about{grid-column:2;grid-row:1}.risk-row-action,.risk-row-chevron{grid-column:1/-1}.risk-row-chevron{justify-self:start;white-space:normal}}
+.stats{display:flex;flex-wrap:wrap;gap:8px 24px;margin:8px 0}
+.stats div{font-size:13px;color:var(--mut)}.stats b{display:block;font-size:18px;color:var(--ink)}
+.meter{display:grid;grid-template-columns:170px 1fr 44px;gap:8px;align-items:center;margin:8px 0;font-size:14px}
+.meter i{display:block;height:10px;border-radius:5px;background:var(--line);overflow:hidden}
+.meter i span{display:block;height:100%;background:var(--accent)}
+footer{font-size:13px;color:var(--mut)}
+@media (max-width:560px){.who{text-align:left}.meter{grid-template-columns:110px 1fr 40px}}
+#landing[hidden],#app[hidden]{display:none}
+.page-enter{animation:page-enter .34s cubic-bezier(.2,.7,.25,1) both}
+@keyframes page-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes content-enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes detail-from-right{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes detail-from-left{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes swap-in{from{opacity:.4}to{opacity:1}}
+@keyframes status-flash{0%{opacity:0}25%{opacity:1}100%{opacity:0}}
+@keyframes risk-meter-fill{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes landing-meter{from{transform:scaleX(0)}to{transform:scaleX(var(--s))}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+#app.intro .alerts li{animation:content-enter .32s cubic-bezier(.2,.7,.25,1) both}
+#app.intro .alerts li:nth-child(2){animation-delay:.04s}#app.intro .alerts li:nth-child(3){animation-delay:.08s}#app.intro .alerts li:nth-child(4){animation-delay:.12s}#app.intro .alerts li:nth-child(5){animation-delay:.16s}#app.intro .alerts li:nth-child(6){animation-delay:.20s}#app.intro .alerts li:nth-child(7){animation-delay:.24s}
+#app.intro .kpi{animation:content-enter .32s cubic-bezier(.2,.7,.25,1) both}
+#app.intro .kpi:nth-child(2){animation-delay:.04s}#app.intro .kpi:nth-child(3){animation-delay:.08s}#app.intro .kpi:nth-child(4){animation-delay:.12s}#app.intro .kpi:nth-child(5){animation-delay:.16s}
+#app.intro .risk-row{animation:content-enter .32s cubic-bezier(.2,.7,.25,1) both}
+#app.intro .risk-row:nth-child(2){animation-delay:.04s}#app.intro .risk-row:nth-child(3){animation-delay:.08s}#app.intro .risk-row:nth-child(4){animation-delay:.12s}
+.landing-intro .tiles .tile{animation:content-enter .3s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .tiles .tile:nth-child(2){animation-delay:.06s}.landing-intro .tiles .tile:nth-child(3){animation-delay:.12s}
+.landing-intro .preview svg rect{transform-box:fill-box;transform-origin:bottom;animation:risk-meter-fill .5s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .preview svg rect:nth-of-type(2){animation-delay:.06s}.landing-intro .preview svg rect:nth-of-type(3){animation-delay:.12s}.landing-intro .preview svg rect:nth-of-type(4){animation-delay:.18s}.landing-intro .preview svg rect:nth-of-type(5){animation-delay:.24s}
+.landing-intro .risk-preview{animation:content-enter .3s cubic-bezier(.2,.7,.25,1) .3s both}
+.landing-intro .risk-preview .chip{animation:content-enter .3s cubic-bezier(.2,.7,.25,1) .36s both}
+.landing-intro .risk-preview .risk-meter i{animation:landing-meter .5s cubic-bezier(.2,.7,.25,1) .3s both}
+.landing-intro .lp-risk{animation:content-enter .36s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .lp-risk-mock .risk-meter i{animation:landing-meter .5s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .lp-risk-row:nth-child(2) .risk-meter i{animation-delay:.06s}
+.landing-intro .lp-risk-row:nth-child(3) .risk-meter i{animation-delay:.12s}
+.landing-intro .lp-risk-row:nth-child(4) .risk-meter i{animation-delay:.18s}
+.landing-intro .lp-risk-row:nth-child(5) .risk-meter i{animation-delay:.24s}
+@media (prefers-reduced-motion:reduce){.landing-intro .preview svg rect{transform:none;animation:none}.landing-intro .lp-risk,.landing-intro .lp-risk-mock .risk-meter i,.landing-intro .risk-preview .risk-meter i,.landing-intro .lp-groups-card,.landing-intro .lp-groups-card .lp-criterion-track i{animation:none}.lp-risk-mock .risk-meter i,.risk-preview .risk-meter i{transition:none;transform:scaleX(var(--s))}.lp-criterion-track i{transform:scaleX(var(--s))}}
+#landing{background:linear-gradient(180deg,#EFE4D2 0%,#F3E0D2 100%)}
+.lp-top{background:var(--surf);box-shadow:0 1px 0 var(--line);padding:16px 24px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.hero{max-width:1120px;margin:0 auto;padding:56px 24px 36px;display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center}
+.hero h2{font:700 clamp(32px,4.8vw,50px)/1.12 "Poppins",system-ui,sans-serif;margin:0 0 18px}
+.hero h2::before{content:"";display:block;width:48px;height:4px;border-radius:2px;background:var(--brand);margin-bottom:16px}
+.lead{font-size:16px;color:var(--mut);max-width:50ch;margin:0 0 24px}
+.cta{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+.btn-link{display:inline-flex;align-items:center;gap:4px;padding:8px 0;border:0;background:transparent;color:var(--accent);font:600 14px "Poppins",system-ui,sans-serif;cursor:pointer}
+.btn-link svg{width:16px;height:16px}
+.btn-link:hover{text-decoration:underline}
+.btn-link:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:4px}
+.who2{font-size:13px;color:var(--mut);max-width:30ch}
+.btn{display:inline-block;background:var(--accent);color:#fff;border-radius:999px;padding:12px 24px;font-weight:600;text-decoration:none;box-shadow:0 8px 18px rgba(31,47,85,.25)}
+.btn.sm{padding:8px 16px;box-shadow:none}
+.btn:hover{background:#16223F}
+.btn:focus-visible,.back:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.preview{background:linear-gradient(145deg,#E6D5BA,#F3E0D2);border-radius:16px;padding:24px;display:grid;gap:12px}
+.pv{background:#FBF6EC;border-radius:16px;padding:16px;box-shadow:0 2px 10px var(--shadow);font-size:13px;color:var(--mut)}
+.pv b{color:#3A3B3F}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.tile{background:#FBF6EC;border-radius:12px;padding:12px;border-left:4px solid;font-size:12px;color:#6B6258;box-shadow:0 2px 10px var(--shadow)}
+.tile strong{display:block;font:700 22px "Poppins",system-ui,sans-serif;color:#3A3B3F}
+.pv .chip{display:inline-block;font-size:12px;font-weight:600;color:#c8322f;border:1px solid #c8322f;border-radius:999px;padding:1px 9px;margin-right:6px}
+.risk-preview .risk-meter{display:block;width:100%;height:6px;margin-top:9px}
+.risk-preview .risk-meter i{background:var(--bad);transition:none}
+.lp-risk{max-width:1120px;margin:0 auto 32px;padding:32px 24px;display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;background:var(--surf);border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 10px var(--shadow)}
+.lp-risk-copy{min-width:0}
+.lp-risk-eyebrow{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--accent-tint);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.lp-risk-eyebrow svg{width:14px;height:14px}
+.lp-risk h2{font:700 clamp(24px,3.4vw,34px)/1.2 "Poppins",system-ui,sans-serif;margin:14px 0}
+.lp-risk-copy>p{font-size:15px;color:var(--mut);margin:0 0 18px}
+.lp-risk-steps{display:grid;gap:14px;margin:20px 0}
+.lp-risk-step{display:grid;grid-template-columns:36px minmax(0,1fr);gap:10px;align-items:start}
+.lp-risk-step-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:var(--accent-tint);color:var(--accent)}
+.lp-risk-step-icon svg{width:19px;height:19px}
+.lp-risk-step b{display:block;font-weight:600}
+.lp-risk-step p{font-size:13px;color:var(--mut);margin:2px 0 0}
+.lp-risk-reassurance{display:flex;align-items:flex-start;gap:8px;font-size:13px!important;color:var(--mut);margin:18px 0!important}
+.lp-risk-reassurance svg{flex:0 0 18px;width:18px;height:18px;margin-top:2px}
+.lp-risk-mock-wrap{min-width:0;background:linear-gradient(145deg,#E6D5BA,#F3E0D2);border-radius:16px;padding:24px}
+.lp-risk-mock{background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 10px var(--shadow)}
+.lp-risk-mock-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.lp-risk-mock-head .card-icon{flex:0 0 32px}
+.lp-risk-mock-head h3{font:600 16px "Poppins",system-ui,sans-serif;margin:0}
+.lp-risk-mock-head .sub{font-size:12px}
+.lp-risk-list{display:grid;gap:8px}
+.lp-risk-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px 10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--surf)}
+.lp-risk-row-name{font-weight:600;min-width:0}
+.lp-risk-row .tag{align-self:start}
+.lp-risk-row-about{font-size:12px;font-weight:600;white-space:nowrap}
+.lp-risk-row-driver{grid-column:1/-1;font-size:12px;line-height:1.4;color:var(--mut);overflow-wrap:anywhere}
+.lp-risk-row .risk-meter{grid-column:1/-1}
+.lp-risk-row .risk-meter i{transition:none}
+.lp-risk-legend{font-size:12px;color:var(--mut);margin:10px 0 0}
+.lp-risk-legend .low{color:var(--ok)}.lp-risk-legend .moderate{color:var(--warn)}.lp-risk-legend .high{color:var(--bad)}
+.lp-risk-cta{margin-top:4px}
+.lp-risk-mock .risk-meter i{transition:none}
+.lp-risk-row .tag.bad~.risk-meter i{background:var(--bad)}
+.lp-risk-row .tag.warn~.risk-meter i{background:var(--warn)}
+.lp-risk-row .tag.ok~.risk-meter i{background:var(--ok)}
+@media (max-width:560px){.lp-risk{padding:24px 18px}.lp-risk-mock-wrap{padding:14px}.lp-risk-mock{padding:12px}.lp-risk-row{grid-template-columns:minmax(0,1fr) auto}.lp-risk-row-name{font-size:12px}.lp-risk-row .tag{font-size:11px;padding:1px 5px}.lp-risk-row-about{grid-column:1/-1}.lp-risk-legend{line-height:1.6}}
+.lp-how{max-width:1120px;margin:0 auto;padding:28px 24px}
+.lp-how-heading{text-align:center;margin:0 auto 20px}
+.lp-how-heading h2{font:700 clamp(22px,2.6vw,28px)/1.2 "Poppins",system-ui,sans-serif;margin:0 0 6px}
+.lp-how-heading p{font-size:14px;color:var(--mut);margin:0}
+.lp-how-steps{position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.lp-how-steps::before{content:"";position:absolute;z-index:0;top:29px;left:calc(12.5% + 12px);right:calc(12.5% + 12px);border-top:1px dashed var(--line)}
+.lp-how-step{position:relative;z-index:1;min-width:0;background:#FBF6EC;border:1px solid #DCC9AB;border-radius:16px;padding:16px;box-shadow:0 2px 10px var(--shadow)}
+.lp-how-step-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.lp-how-number{display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 "Poppins",system-ui,sans-serif}
+.lp-how-icon{display:grid;place-items:center;flex:0 0 36px;width:36px;height:36px;border-radius:10px;background:var(--accent-tint);color:var(--accent)}
+.lp-how-icon svg{width:19px;height:19px}
+.lp-how-step h3{font:600 15px/1.35 "Poppins",system-ui,sans-serif;margin:0 0 6px}
+.lp-how-step p{font-size:13px;color:var(--mut);margin:0}
+.lp-how-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;margin:16px 0 0;font-size:12px;color:var(--mut)}
+.lp-how-legend-item{display:flex;align-items:center;gap:6px}
+.lp-how-legend-item .tag{font-size:11px}
+.landing-intro .lp-how-step{animation:content-enter .32s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .lp-how-step:nth-child(2){animation-delay:.06s}
+.landing-intro .lp-how-step:nth-child(3){animation-delay:.12s}
+.landing-intro .lp-how-step:nth-child(4){animation-delay:.18s}
+.lp-groups{max-width:1120px;margin:0 auto;padding:28px 24px}
+.lp-groups-heading{text-align:center;margin:0 auto 20px}
+.lp-groups-heading h2{font:700 clamp(22px,2.6vw,28px)/1.2 "Poppins",system-ui,sans-serif;margin:0 0 6px}
+.lp-groups-heading p{font-size:14px;color:var(--mut);margin:0 0 20px}
+.lp-groups-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:stretch}
+.lp-group-card{min-width:0;background:var(--surf);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 2px 10px var(--shadow)}
+.lp-group-card{display:flex;flex-direction:column}
+.lp-group-card.sete{border-color:var(--g-sete-chart);box-shadow:0 4px 16px rgba(91,91,51,.14)}
+.lp-group-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.lp-group-title{min-width:0;flex:1}
+.lp-group-title h3{font:600 17px/1.3 "Poppins",system-ui,sans-serif;margin:6px 0 0}
+.lp-group-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.lp-group-chip svg{width:13px;height:13px}
+.lp-group-chip.grades{background:var(--g-grades-tint);color:var(--g-grades)}
+.lp-group-chip.sete{background:var(--g-sete-tint);color:var(--g-sete)}
+.lp-grade-list,.lp-sete-list{flex:1;display:flex;flex-direction:column;gap:10px}
+.lp-grade-item{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:8px;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.lp-grade-item-head{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:8px;align-items:center}
+.lp-grade-item .lp-risk-step-icon{background:var(--g-grades-tint);color:var(--g-grades)}
+.lp-grade-item .lp-risk-step-icon{width:32px;height:32px;border-radius:9px}
+.lp-grade-item .lp-risk-step-icon svg{width:18px;height:18px}
+.lp-grade-item b{display:block;font-size:14px;font-weight:600;line-height:1.3}
+.lp-grade-item p{font-size:12px;color:var(--mut);margin:0}
+.lp-grade-item-main{display:flex;align-items:center;gap:12px}
+.lp-grade-value{font:700 22px/1.2 "Poppins",system-ui,sans-serif;color:var(--ink);white-space:nowrap}
+.lp-grade-result .tag{font-size:11px;padding:1px 5px}
+.lp-grade-result{display:grid;justify-items:end;gap:3px}
+.lp-subcard{flex:1;min-height:0;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
+.lp-subcard-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.lp-subcard-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:9px;background:var(--g-sete-tint);color:var(--g-sete)}
+.lp-subcard-icon svg{width:18px;height:18px}
+.lp-subcard-title{flex:1;min-width:0;font-size:14px;font-weight:600;line-height:1.3}
+.lp-section-squares{display:grid;grid-template-columns:repeat(4,22px);gap:6px;margin-left:auto}
+.lp-section-square{display:grid;justify-items:center;gap:2px;color:var(--mut);font-size:10px;line-height:1.2}
+.lp-section-square i{display:grid;place-items:center;width:22px;height:22px;border-radius:6px;background:#dff1ed;color:var(--ok)}
+.lp-section-square.late i{background:#fde9e7;color:var(--bad)}
+.lp-section-square svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lp-mini-bar{position:relative;flex:1;min-width:100px;margin:8px 0 12px;padding-bottom:14px}
+.lp-mini-track{position:relative;height:8px;border-radius:999px;background:var(--line)}
+.lp-mini-fill{height:100%;width:var(--value);border-radius:inherit;background:var(--bar-color)}
+.lp-mini-tick{position:absolute;top:-3px;height:14px;border-left:1.5px solid var(--ink);left:var(--tick)}
+.lp-mini-tick-label{position:absolute;top:10px;left:var(--tick);transform:translateX(-50%);font-size:10px;line-height:1;color:var(--mut)}
+.lp-grade-hint,.lp-sete-hint{font-size:12px;color:var(--mut);margin:0}
+.lp-sete-list{gap:10px}
+.lp-sete-subcard{display:flex;flex-direction:column}
+.lp-sete-subcard .lp-sete-hint{margin-top:auto;padding-top:10px}
+.lp-sete-copy{font-size:13px;color:var(--mut);margin:0 0 8px}
+.lp-sete-highlight{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:8px 0 4px}
+.lp-sete-value{font:700 28px/1.1 "Poppins",system-ui,sans-serif;color:var(--ink);margin-right:2px}
+.lp-neutral{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:4px;padding:1px 7px;color:var(--mut);font-size:11px;font-weight:600;white-space:nowrap}
+.lp-sete-chart{display:block;width:100%;height:auto;max-height:72px;margin:2px 0 0;overflow:hidden}
+.lp-sete-labels{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;color:var(--mut);font-size:11px;line-height:1.25}
+.lp-sete-labels span{min-width:0}
+.lp-sete-labels .mobile-label{display:none}
+.lp-sete-labels small{display:block;font:inherit}
+.lp-sete-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin:6px 0 10px;color:var(--mut);font-size:11px}
+.lp-sete-legend-item{display:inline-flex;align-items:center;gap:5px}
+.lp-sete-swatch{display:inline-block;width:18px;border-top:2px dashed var(--ok)}
+.lp-sete-swatch.warning{border-color:var(--bad)}
+.lp-criteria{display:grid;gap:8px}
+.lp-criterion-label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
+.lp-criterion-label>span:first-child{min-width:0}
+.lp-criterion-value{flex:0 0 auto;font-weight:600}
+.lp-lowest{display:inline-block;margin-left:4px;border-radius:999px;padding:1px 6px;background:var(--line);color:var(--mut);font-size:11px;font-weight:600;white-space:nowrap}
+.lp-criterion-track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.lp-criterion-track i{display:block;width:100%;height:100%;border-radius:3px;background:var(--g-sete-chart);transform:scaleX(var(--s));transform-origin:left center}
+.lp-sete-privacy{display:flex;align-items:flex-start;gap:7px;margin:12px 0 0;font-size:12px;color:var(--mut)}
+.lp-sete-privacy svg{flex:0 0 14px;width:14px;height:14px;margin-top:2px}
+.lp-groups-footnote{text-align:center;color:var(--mut);font-size:12px;margin:12px 0 0}
+.landing-intro .lp-groups-card{animation:content-enter .36s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .lp-groups-card:nth-child(2){animation-delay:.06s}
+.landing-intro .lp-groups-card .lp-criterion-track i{animation:landing-meter .5s cubic-bezier(.2,.7,.25,1) both}
+.landing-intro .lp-groups-card .lp-criteria .lp-criterion:nth-child(2) .lp-criterion-track i{animation-delay:.06s}
+.landing-intro .lp-groups-card .lp-criteria .lp-criterion:nth-child(3) .lp-criterion-track i{animation-delay:.12s}
+.landing-intro .lp-groups-card .lp-criteria .lp-criterion:nth-child(4) .lp-criterion-track i{animation-delay:.18s}
+.landing-intro .lp-groups-card .lp-criteria .lp-criterion:nth-child(5) .lp-criterion-track i{animation-delay:.24s}
+.landing-intro .lp-groups-card .lp-criteria .lp-criterion:nth-child(6) .lp-criterion-track i{animation-delay:.30s}
+@media (prefers-reduced-motion:reduce){#landing.landing-intro .lp-groups-card,#landing.landing-intro .lp-how-step{animation:none}#landing.landing-intro .lp-groups-card .lp-criteria .lp-criterion .lp-criterion-track i{animation:none;transform:scaleX(var(--s))}}
+@media (max-width:820px){.lp-groups-grid{grid-template-columns:1fr}}
+@media (max-width:820px){.lp-how-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.lp-how-steps::before{display:none}}
+@media (max-width:560px){.lp-groups{padding:24px}.lp-group-card{padding:16px}.lp-group-title h3{font-size:16px}.lp-sete-labels .desktop-label{display:none}.lp-sete-labels .mobile-label{display:block}.lp-how-steps{grid-template-columns:1fr}.lp-grade-item-head{grid-template-columns:28px minmax(0,1fr)}.lp-grade-item-head>.tag{grid-column:2;justify-self:start}.lp-grade-item .lp-risk-step-icon{width:28px;height:28px}.lp-section-squares{grid-template-columns:repeat(4,20px);gap:4px}.lp-section-square i{width:20px;height:20px}.lp-grade-item-main{gap:8px}}
+.lp-foot{max-width:1120px;margin:0 auto;padding:16px 24px 32px;font-size:13px;color:var(--mut)}
+.back{display:block;width:max-content;padding:0;border:0;background:transparent;color:var(--accent);font:500 13px/1.5 "Poppins",system-ui,sans-serif;text-align:right;cursor:pointer;margin:0 0 2px auto}
+@media (max-width:820px){.hero{grid-template-columns:1fr;padding-top:36px}.lp-risk{grid-template-columns:1fr;gap:24px}}
+@media (max-width:560px){.brand small{font-size:12px;max-width:185px;line-height:1.35}}
+</style>
+</head>
+<body>
+<div id="landing">
+  <div class="lp-top"><div class="brand"><svg width="38" height="38" viewBox="126 40 88 88" aria-hidden="true"><rect x="126" y="40" width="88" height="88" rx="20" fill="#1F2F55"/><polygon points="170,56 202,72 170,88 138,72" fill="#FFFFFF"/><path d="M152 82 V96 Q170 106 188 96 V82" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/><polyline points="148,77 160,72 168,75 184,67 202,72 202,93" fill="none" stroke="#A8482A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="202" cy="97" r="3.5" fill="#A8482A"/></svg><div><h1>Profesight</h1><small>To oversee, to foresee, for faculty</small></div></div><a class="btn sm" href="#dashboard">Open dashboard</a></div>
+  <section class="hero">
+    <div>
+      <h2>Know how your classes are doing while there is still time to help</h2>
+      <p class="lead">Profesight turns grade submissions, student results, and Student Evaluation of Teaching Effectiveness (SETE) feedback from the Student and Faculty Portal into one clear dashboard for faculty members.</p>
+      <div class="cta"><a class="btn" href="#dashboard">Open my dashboard</a><button type="button" class="btn-link" onclick="document.getElementById('how').scrollIntoView({behavior: REDUCED ? 'auto' : 'smooth'})">See how it works <span id="lpHowChevron"></span></button><span class="who2">Signed in as Prof. Maria L. Santos. You see your own classes only.</span></div>
+    </div>
+    <div class="preview" aria-hidden="true">
+      <div class="tiles">
+        <div class="tile" style="border-color:#c8322f"><strong>50%</strong>Grades on time</div>
+        <div class="tile" style="border-color:#c98a12"><strong>81.4%</strong>Passing rate</div>
+        <div class="tile" style="border-color:#1f9d8a"><strong>4.06</strong>SETE rating (of 5)</div>
+      </div>
+      <div class="pv"><b>Passing rate by section</b>
+        <svg viewBox="0 0 260 90" width="100%" height="90" role="presentation"><line x1="0" y1="80" x2="260" y2="80" stroke="#DCC9AB"/><rect x="14" y="13.12" width="44" height="66.88" rx="6" fill="#1F2F55"/><rect x="78" y="25.28" width="44" height="54.72" rx="6" fill="#C9B79A"/><rect x="142" y="10.84" width="44" height="69.16" rx="6" fill="#1F2F55"/><rect x="206" y="26.8" width="44" height="53.2" rx="6" fill="#C9B79A"/></svg>
+      </div>
+      <div class="pv risk-preview"><b>Section risk</b><p style="margin:6px 0 0"><span class="chip">High risk · 65%</span>IT 301 (BSIT-3B)</p><span class="risk-meter" aria-hidden="true"><i style="--s:.65"></i></span><p style="margin:4px 0 0">Assessment average and SETE composite are raising risk.</p></div>
+    </div>
+  </section>
+  <section class="lp-how" id="how">
+    <div class="lp-how-heading"><h2>How Profesight works</h2><p>From a quick scan to a clear next step in four moves.</p></div>
+    <div class="lp-how-steps">
+      <article class="lp-how-step"><div class="lp-how-step-top"><span class="lp-how-number">1</span><span class="lp-how-icon" id="lpHowCalendar"></span></div><h3>Choose a term and section</h3><p>Filter by academic year, semester, subject, and section. Everything on the page updates to match.</p></article>
+      <article class="lp-how-step"><div class="lp-how-step-top"><span class="lp-how-number">2</span><span class="lp-how-icon" id="lpHowBarChart"></span></div><h3>Scan the alerts and KPI cards</h3><p>Alerts list class-level issues. Each of the five cards shows a value, its target, and a status.</p></article>
+      <article class="lp-how-step"><div class="lp-how-step-top"><span class="lp-how-number">3</span><span class="lp-how-icon" id="lpHowLayers"></span></div><h3>Open the details</h3><p>Click a KPI card, a chart bar, or a risk row to compare by KPI or inspect one section in the Details panel.</p></article>
+      <article class="lp-how-step"><div class="lp-how-step-top"><span class="lp-how-number">4</span><span class="lp-how-icon" id="lpHowActivity"></span></div><h3>Act early</h3><p>Use the Section risk estimate to plan a review session or tutoring before grades are final.</p></article>
+    </div>
+    <div class="lp-how-legend">
+      <span class="lp-how-legend-item"><span class="tag ok">Meets target</span><span>at or above the target</span></span>
+      <span class="lp-how-legend-item"><span class="tag warn">Below target</span><span>under the target but above the warning level</span></span>
+      <span class="lp-how-legend-item"><span class="tag bad">Needs action</span><span>at or below the warning level</span></span>
+    </div>
+  </section>
+  <section class="lp-groups">
+    <div class="lp-groups-heading"><h2>Your results and your students' feedback, side by side</h2><p>Example cards from sample data, with a note on how to read each one.</p></div>
+    <div class="lp-groups-grid">
+      <article class="lp-group-card lp-groups-card">
+        <div class="lp-group-head"><div class="lp-group-title"><span class="lp-group-chip grades"><span id="lpGradesBook"></span>Grades</span><h3>How your classes are performing</h3></div></div>
+        <div class="lp-grade-list">
+          <div class="lp-grade-item">
+            <div class="lp-grade-item-head"><span class="lp-risk-step-icon" id="lpGradesClock"></span><b>Grade submission timeliness</b><span class="tag bad">Needs action</span></div>
+            <div class="lp-grade-item-main"><strong class="lp-grade-value">50%</strong><div class="lp-section-squares" aria-label="Grade sheets on time by section"><span class="lp-section-square"><i><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="5 12 10 17 20 7"/></svg></i>3A</span><span class="lp-section-square late"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></i>3B</span><span class="lp-section-square"><i><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="5 12 10 17 20 7"/></svg></i>2A</span><span class="lp-section-square late"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></i>4A</span></div></div>
+            <p class="lp-grade-hint">2 of 4 grade sheets on time. Target 95%.</p>
+          </div>
+          <div class="lp-grade-item">
+            <div class="lp-grade-item-head"><span class="lp-risk-step-icon" id="lpGradesUsers"></span><b>Student passing rate</b><span class="tag warn">Below target</span></div>
+            <div class="lp-grade-item-main"><strong class="lp-grade-value">81.4%</strong><div class="lp-mini-bar" aria-label="81.4 percent; warning at 75, target at 85"><div class="lp-mini-track"><i class="lp-mini-fill" style="--value:81.4%;--bar-color:var(--warn)"></i><i class="lp-mini-tick" style="--tick:75%"></i><i class="lp-mini-tick" style="--tick:85%"></i></div><span class="lp-mini-tick-label" style="--tick:75%">75</span><span class="lp-mini-tick-label" style="--tick:85%">85</span></div></div>
+            <p class="lp-grade-hint">Weighted by class size. Target 85% or higher.</p>
+          </div>
+          <div class="lp-grade-item">
+            <div class="lp-grade-item-head"><span class="lp-risk-step-icon" id="lpGradesClipboard"></span><b>Average assessment score</b><span class="tag ok">Meets target</span></div>
+            <div class="lp-grade-item-main"><strong class="lp-grade-value">77.0%</strong><div class="lp-mini-bar" aria-label="77 percent; warning at 65, target at 75"><div class="lp-mini-track"><i class="lp-mini-fill" style="--value:77%;--bar-color:var(--ok)"></i><i class="lp-mini-tick" style="--tick:65%"></i><i class="lp-mini-tick" style="--tick:75%"></i></div><span class="lp-mini-tick-label" style="--tick:65%">65</span><span class="lp-mini-tick-label" style="--tick:75%">75</span></div></div>
+            <p class="lp-grade-hint">Activities 80.8% · Exams 73.2%. Target 75% or higher.</p>
+          </div>
+        </div>
+      </article>
+      <article class="lp-group-card lp-groups-card sete">
+        <div class="lp-group-head"><div class="lp-group-title"><span class="lp-group-chip sete"><span id="lpSeteStar"></span>SETE</span><h3>How students rate your teaching</h3></div></div>
+        <div class="lp-sete-list">
+          <section class="lp-subcard lp-sete-subcard">
+            <div class="lp-subcard-head"><span class="lp-subcard-icon" id="lpSeteTrendIcon"></span><strong class="lp-subcard-title">Average SETE rating and trend</strong><span class="tag ok">Meets target</span></div>
+            <div class="lp-sete-highlight"><strong class="lp-sete-value">4.06 / 5</strong><span class="lp-neutral">+0.04 vs last semester</span></div>
+            <svg class="lp-sete-chart" viewBox="0 0 600 70" width="100%" style="max-height:72px" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+              <line x1="0" y1="30" x2="600" y2="30" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>
+              <line x1="0" y1="55" x2="600" y2="55" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>
+              <polyline points="75,29 225,30.5 375,29 525,27" fill="none" stroke="var(--g-sete-chart)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="75" cy="29" r="5" fill="var(--g-sete-chart)"/><circle cx="225" cy="30.5" r="5" fill="var(--g-sete-chart)"/><circle cx="375" cy="29" r="5" fill="var(--g-sete-chart)"/><circle cx="525" cy="27" r="5" fill="var(--g-sete-chart)"/>
+            </svg>
+            <div class="lp-sete-labels"><span aria-label="1st 24–25"><span class="desktop-label">1st 24–25</span><span class="mobile-label">1st<small>24–25</small></span></span><span aria-label="2nd 24–25"><span class="desktop-label">2nd 24–25</span><span class="mobile-label">2nd<small>24–25</small></span></span><span aria-label="1st 25–26"><span class="desktop-label">1st 25–26</span><span class="mobile-label">1st<small>25–26</small></span></span><span aria-label="2nd 25–26"><span class="desktop-label">2nd 25–26</span><span class="mobile-label">2nd<small>25–26</small></span></span></div>
+            <div class="lp-sete-legend"><span class="lp-sete-legend-item"><i class="lp-sete-swatch"></i>Target 4.0</span><span class="lp-sete-legend-item"><i class="lp-sete-swatch warning"></i>Warning 3.5</span></div>
+            <p class="lp-sete-hint">Students rate teaching on five criteria (SETE, Student Evaluation of Teaching Effectiveness). Target 4.0 or higher.</p>
+          </section>
+          <section class="lp-subcard lp-sete-subcard">
+            <div class="lp-subcard-head"><span class="lp-subcard-icon" id="lpSeteCriteriaIcon"></span><strong class="lp-subcard-title">Rating by criterion</strong></div>
+            <div class="lp-criteria">
+              <div class="lp-criterion"><div class="lp-criterion-label"><span>Subject mastery</span><span class="lp-criterion-value">4.13</span></div><div class="lp-criterion-track"><i style="--s:.826"></i></div></div>
+              <div class="lp-criterion"><div class="lp-criterion-label"><span>Teaching methods</span><span class="lp-criterion-value">3.93</span></div><div class="lp-criterion-track"><i style="--s:.786"></i></div></div>
+              <div class="lp-criterion"><div class="lp-criterion-label"><span>Classroom management</span><span class="lp-criterion-value">4.11</span></div><div class="lp-criterion-track"><i style="--s:.822"></i></div></div>
+              <div class="lp-criterion"><div class="lp-criterion-label"><span>Communication</span><span class="lp-criterion-value">4.28</span></div><div class="lp-criterion-track"><i style="--s:.856"></i></div></div>
+              <div class="lp-criterion"><div class="lp-criterion-label"><span>Student engagement <span class="lp-lowest">Lowest rated</span></span><span class="lp-criterion-value">3.86</span></div><div class="lp-criterion-track"><i style="--s:.772"></i></div></div>
+            </div>
+            <p class="lp-sete-hint">The lowest-rated criterion shows where to focus.</p>
+            <p class="lp-sete-privacy"><span id="lpSeteShield"></span><span>Shown only when a section has 5 or more respondents. No student names are ever shown.</span></p>
+          </section>
+        </div>
+      </article>
+    </div>
+    <p class="lp-groups-footnote">Sample data for 2nd Sem, 2025–26.</p>
+  </section>
+  <section class="lp-risk">
+    <div class="lp-risk-copy">
+      <span class="lp-risk-eyebrow"><span id="lpRiskActivity"></span>Early warning</span>
+      <h2>See which sections may need help before the semester ends</h2>
+      <p>Section risk estimates the chance that each of your sections finishes below 75% passing, using assessment results so far, the previous semester's passing rate and SETE ratings, and class size.</p>
+      <div class="lp-risk-steps">
+        <div class="lp-risk-step"><span class="lp-risk-step-icon" id="lpRiskBarChart"></span><div><b>Reads the signals</b><p>Assessment average so far, previous passing rate, SETE composite, and class size.</p></div></div>
+        <div class="lp-risk-step"><span class="lp-risk-step-icon" id="lpRiskActivityStep"></span><div><b>Estimates the risk</b><p>Each section is labeled Low, Moderate, or High with a percentage.</p></div></div>
+        <div class="lp-risk-step"><span class="lp-risk-step-icon" id="lpRiskCheck"></span><div><b>Suggests a next step</b><p>For example, schedule a review session or refer students for tutoring.</p></div></div>
+      </div>
+      <p class="lp-risk-reassurance"><span id="lpRiskShield"></span><span>A support signal, not an evaluation of the teacher. SETE is only used with 5 or more respondents, and any decision needs human review.</span></p>
+      <a class="btn lp-risk-cta" href="#dashboard" data-scroll-risk>See section risk in the dashboard</a>
+    </div>
+    <div class="lp-risk-mock-wrap" aria-hidden="true">
+      <div class="lp-risk-mock">
+        <div class="lp-risk-mock-head"><div class="card-icon"><span id="lpRiskMockActivity"></span></div><div><h3>Section risk</h3><p class="sub">2nd Sem, 2025–26 · sample data</p></div></div>
+        <div class="lp-risk-list">
+          <div class="lp-risk-row"><span class="lp-risk-row-name">IT 301 (BSIT-3B)</span><span class="tag bad">High risk</span><span class="lp-risk-row-about">About 65%</span><span class="lp-risk-row-driver">Assessment average so far is 68.0% (target 75%); last semester's SETE composite was 3.44 (target 4.0)</span><span class="risk-meter"><i style="--s:.65"></i></span></div>
+          <div class="lp-risk-row"><span class="lp-risk-row-name">IT 312 (BSIT-4A)</span><span class="tag warn">Moderate risk</span><span class="lp-risk-row-about">About 35%</span><span class="lp-risk-row-driver">Assessment average so far is 68.0% (target 75%)</span><span class="risk-meter"><i style="--s:.35"></i></span></div>
+          <div class="lp-risk-row"><span class="lp-risk-row-name">IT 301 (BSIT-3A)</span><span class="tag ok">Low risk</span><span class="lp-risk-row-about">About 20%</span><span class="lp-risk-row-driver">No factors raising the risk</span><span class="risk-meter"><i style="--s:.2"></i></span></div>
+          <div class="lp-risk-row"><span class="lp-risk-row-name">IT 305 (BSIT-2A)</span><span class="tag ok">Low risk</span><span class="lp-risk-row-about">About 10%</span><span class="lp-risk-row-driver">No factors raising the risk</span><span class="risk-meter"><i style="--s:.1"></i></span></div>
+        </div>
+        <p class="lp-risk-legend"><span class="low">Low below 35%</span> · <span class="moderate">Moderate 35–59%</span> · <span class="high">High 60% or more</span> · Illustrative estimate</p>
+      </div>
+    </div>
+  </section>
+  <p class="lp-foot">Demo with sample data. Sign-in is simulated for this case study.</p>
+</div>
+<div id="app" hidden>
+<header>
+  <div class="brand">
+    <svg width="38" height="38" viewBox="126 40 88 88" aria-hidden="true"><rect x="126" y="40" width="88" height="88" rx="20" fill="#1F2F55"/><polygon points="170,56 202,72 170,88 138,72" fill="#FFFFFF"/><path d="M152 82 V96 Q170 106 188 96 V82" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round"/><polyline points="148,77 160,72 168,75 184,67 202,72 202,93" fill="none" stroke="#A8482A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="202" cy="97" r="3.5" fill="#A8482A"/></svg>
+    <div><h1>Profesight</h1><small>To oversee, to foresee, for faculty</small></div>
+  </div>
+  <div class="who"><button type="button" class="back" data-home>Back to home</button><b><span id="headerUserIcon"></span>Prof. Maria L. Santos</b>College of Informatics and Computing Sciences, Information Technology</div>
+</header>
+<div class="filters" role="group" aria-label="Filters">
+  <label><span class="filter-label"><span id="yearIcon"></span>Academic year</span><select id="fAy"><option value="0">2024–2025</option><option value="1" selected>2025–2026</option></select></label>
+  <label><span class="filter-label"><span id="semesterIcon"></span>Semester</span><select id="fSem"><option value="0">1st semester</option><option value="1" selected>2nd semester</option></select></label>
+  <label><span class="filter-label"><span id="subjectIcon"></span>Subject</span><select id="fSub"></select></label>
+  <label><span class="filter-label"><span id="sectionIcon"></span>Section</span><select id="fSec"></select></label>
+</div>
+<main>
+  <section class="card alerts" aria-live="polite"><h2>Alerts</h2><ul id="alerts"></ul></section>
+  <section><div class="kpis" id="kpis"></div></section>
+  <section class="charts">
+    <div class="card"><div class="card-head"><div class="card-icon" style="--group-color:var(--g-grades);--group-tint:var(--g-grades-tint);"><span id="gradesChartIcon"></span></div><div class="card-title"><h2>Passing rate and assessment score by section</h2></div><span class="g-chip" style="--group-color:var(--g-grades);--group-tint:var(--g-grades-tint);"><span id="gradesChartGroupIcon"></span>Grades</span></div><p class="sub">Click a bar to open that section's details</p><div class="chart"><canvas id="c3" tabindex="0" role="img" aria-label="Bar chart of passing rate and average assessment score per section"></canvas></div></div>
+    <div class="card"><div class="card-head"><div class="card-icon" style="--group-color:var(--g-sete);--group-tint:var(--g-sete-tint);"><span id="seteTrendChartIcon"></span></div><div class="card-title"><h2>SETE composite rating by semester</h2></div><span class="g-chip" style="--group-color:var(--g-sete);--group-tint:var(--g-sete-tint);"><span id="seteTrendGroupIcon"></span>SETE</span></div><p class="sub">Line chart with the 4.0 target and 3.5 warning level</p><div class="chart"><canvas id="c1" role="img" aria-label="Line chart of SETE composite rating by semester"></canvas></div></div>
+    <div class="card"><div class="card-head"><div class="card-icon" style="--group-color:var(--g-sete);--group-tint:var(--g-sete-tint);"><span id="seteCriteriaChartIcon"></span></div><div class="card-title"><h2>SETE rating by criterion</h2></div><span class="g-chip" style="--group-color:var(--g-sete);--group-tint:var(--g-sete-tint);"><span id="seteCriteriaGroupIcon"></span>SETE</span></div><p class="sub" id="c2sub">Current and previous semester</p><div class="chart"><canvas id="c2" role="img" aria-label="Clustered bar chart of SETE mean rating per criterion"></canvas></div></div>
+  </section>
+  <section class="card risk" id="risk"></section>
+  <section class="privacy-strip" aria-label="Privacy by design">
+    <div class="privacy-strip-title"><span class="privacy-strip-icon" id="privacyShield"></span><span>Privacy by design</span></div>
+    <div class="privacy-strip-items">
+      <span class="privacy-strip-item"><span id="privacyUsers"></span><span>Class-level alerts only</span></span>
+      <span class="privacy-strip-item"><span id="privacyEyeOff"></span><span>SETE hidden under 5 respondents</span></span>
+      <span class="privacy-strip-item"><span id="privacyLock"></span><span>Your classes only, no student names</span></span>
+    </div>
+  </section>
+  <footer>Card colors: green meets the target, yellow is below target, red is at or below the warning level (grade submission timeliness: 85%, passing rate: 75%, SETE rating: 3.5, assessment score: 65%, SETE rating trend: a decline of 0.4). Sample data for demonstration.</footer>
+</main>
+<div id="scrim" class="scrim" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden>
+  <div class="drawer-head">
+    <div class="card-icon" style="--group-tint:var(--accent-tint);--group-color:var(--accent);"><span id="drawerIcon"></span></div>
+    <div class="drawer-title"><h2 id="drawerTitle">Details</h2><p class="sub" id="drawerSubtitle"></p></div>
+    <button type="button" class="drawer-close" aria-label="Close details"><span id="drawerCloseIcon"></span></button>
+  </div>
+  <div id="drawerBody" class="drawer-body"></div>
+</aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const TERMS=['1st Sem, 2024–25','2nd Sem, 2024–25','1st Sem, 2025–26','2nd Sem, 2025–26'];
+const CR=['Subject mastery','Teaching methods','Classroom management','Communication','Student engagement'];
+const SEC=[{n:'IT 301 Web Systems',c:'IT 301',s:'BSIT-3A'},{n:'IT 301 Web Systems',c:'IT 301',s:'BSIT-3B'},{n:'IT 305 Database Management',c:'IT 305',s:'BSIT-2A'},{n:'IT 312 Systems Integration',c:'IT 312',s:'BSIT-4A'}];
+// [enrolled, respondents, passing %, activities %, exams %, grades on time (1/0), 5 SETE criteria means]
+const D=[
+[[38,30,86,84,76,1,4.1,3.9,4.0,4.2,3.8],[36,28,80,80,70,1,3.8,3.6,3.9,4.0,3.5],[40,31,88,86,78,1,4.3,4.1,4.2,4.4,4.0],[30,24,90,88,80,0,4.2,4.0,4.1,4.3,4.0]],
+[[38,31,85,83,74,1,4.0,3.9,4.0,4.2,3.7],[35,27,78,78,68,0,3.6,3.5,3.8,3.9,3.4],[41,33,89,87,79,1,4.3,4.2,4.2,4.4,4.1],[29,23,88,86,77,1,4.1,4.0,4.1,4.2,3.9]],
+[[39,32,87,85,77,1,4.2,4.0,4.1,4.3,3.9],[34,26,76,76,66,0,3.5,3.3,3.6,3.7,3.1],[40,32,90,88,80,1,4.4,4.2,4.3,4.5,4.2],[31,22,89,87,78,1,4.2,4.1,4.2,4.3,4.0]],
+[[38,31,88,86,79,1,4.3,4.1,4.2,4.4,4.0],[33,25,72,74,62,0,3.4,3.2,3.6,3.7,3.1],[42,34,91,89,82,1,4.5,4.3,4.4,4.6,4.3],[30,4,70,70,66,0,3.9,3.8,3.9,4.0,3.7]]];
+const MINR=5;
+const KP=[
+ {k:'k1',g:'Grades',n:'Grade submission timeliness',t:95,w:85,f:v=>v.toFixed(0)+'%',tg:'Target ≥ 95%'},
+ {k:'k2',g:'Grades',n:'Student passing rate',t:85,w:75,f:v=>v.toFixed(1)+'%',tg:'Target ≥ 85%'},
+ {k:'k4',g:'Grades',n:'Average assessment score',t:75,w:65,f:v=>v.toFixed(1)+'%',tg:'Target ≥ 75%'},
+ {k:'k3',g:'SETE',n:'Average SETE rating',t:4,w:3.5,f:v=>v.toFixed(2)+' / 5',tg:'Target ≥ 4.0'},
+ {k:'k5',g:'SETE',n:'SETE rating trend',t:-0.2,w:-0.4,f:v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2),tg:'No decline over 0.2'}];
+const $=id=>document.getElementById(id);
+const ICONS={clock:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',userCheck:'<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>',clipboard:'<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>',star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',trendingUp:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',barChart:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',calendar:'<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',alert:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',checkCircle:'<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',chevron:'<polyline points="9 18 15 12 9 6"/>',x:'<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',layers:'<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',activity:'<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'};
+function ico(name,size=18){const path=ICONS[name]||'';return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;}
+ICONS.eyeOff='<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+ICONS.lock='<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>';
+const st={sub:'All',sec:'All',mode:'kpi',kpi:'k1',secIdx:null,riskSete:true};
+let drawerTrigger=null;
+$('headerUserIcon').innerHTML=ico('users',16);
+$('drawerIcon').innerHTML=ico('layers',18);
+$('drawerCloseIcon').innerHTML=ico('x',18);
+$('lpRiskActivity').innerHTML=ico('activity',14);
+$('lpRiskBarChart').innerHTML=ico('barChart',19);
+$('lpRiskActivityStep').innerHTML=ico('activity',19);
+$('lpRiskCheck').innerHTML=ico('checkCircle',19);
+$('lpRiskShield').innerHTML=ico('shield',18);
+$('lpRiskMockActivity').innerHTML=ico('activity',18);
+$('lpGradesBook').innerHTML=ico('book',13);
+$('lpGradesClock').innerHTML=ico('clock',19);
+$('lpGradesUsers').innerHTML=ico('userCheck',19);
+$('lpGradesClipboard').innerHTML=ico('clipboard',19);
+$('lpSeteStar').innerHTML=ico('star',13);
+$('lpSeteShield').innerHTML=ico('shield',14);
+$('lpSeteTrendIcon').innerHTML=ico('star',18);
+$('lpSeteCriteriaIcon').innerHTML=ico('barChart',18);
+$('lpHowChevron').innerHTML=ico('chevron',16);
+$('lpHowCalendar').innerHTML=ico('calendar',19);
+$('lpHowBarChart').innerHTML=ico('barChart',19);
+$('lpHowLayers').innerHTML=ico('layers',19);
+$('lpHowActivity').innerHTML=ico('activity',19);
+$('privacyShield').innerHTML=ico('shield',18);
+$('privacyUsers').innerHTML=ico('users',16);
+$('privacyEyeOff').innerHTML=ico('eyeOff',16);
+$('privacyLock').innerHTML=ico('lock',16);
+$('yearIcon').innerHTML=ico('calendar',14);
+$('semesterIcon').innerHTML=ico('calendar',14);
+$('subjectIcon').innerHTML=ico('book',14);
+$('sectionIcon').innerHTML=ico('users',14);
+$('gradesChartIcon').innerHTML=ico('barChart',18);
+$('gradesChartGroupIcon').innerHTML=ico('book',12);
+$('seteTrendChartIcon').innerHTML=ico('trendingUp',18);
+$('seteTrendGroupIcon').innerHTML=ico('star',12);
+$('seteCriteriaChartIcon').innerHTML=ico('star',18);
+$('seteCriteriaGroupIcon').innerHTML=ico('star',12);
+const T=()=>(+$('fAy').value)*2+(+$('fSem').value);
+const idxs=()=>SEC.map((s,i)=>i).filter(i=>(st.sub==='All'||SEC[i].n===st.sub)&&(st.sec==='All'||SEC[i].s===st.sec));
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const wavg=(v,w)=>{const s=sum(w);return s?sum(v.map((x,i)=>x*w[i]))/s:null};
+const okR=(t,ix)=>ix.filter(i=>D[t][i][1]>=MINR);
+const comp=(t,ix)=>{const o=okR(t,ix);return o.length?wavg(o.map(i=>sum(D[t][i].slice(6))/5),o.map(i=>D[t][i][1])):null};
+const crit=(t,ix)=>{const o=okR(t,ix);return CR.map((_,c)=>o.length?wavg(o.map(i=>D[t][i][6+c]),o.map(i=>D[t][i][1])):null)};
+function kpis(t,ix){
+  const e=ix.map(i=>D[t][i][0]);
+  const c=comp(t,ix),p=t>0?comp(t-1,ix):null;
+  return{
+    k1:ix.length?ix.filter(i=>D[t][i][5]).length/ix.length*100:null,
+    k2:wavg(ix.map(i=>D[t][i][2]),e),
+    k3:c,
+    k4:wavg(ix.map(i=>(D[t][i][3]+D[t][i][4])/2),e),
+    k5:c!=null&&p!=null?c-p:null};
+}
+const status=(v,K)=>v==null?'na':v>=K.t-1e-9?'ok':v>K.w?'warn':'bad';
+const LBL={ok:'Meets target',warn:'Below target',bad:'Needs action',na:'No data'};
+const secName=i=>SEC[i].c+' ('+SEC[i].s+')';
+// These illustrative coefficients are not trained on real data.
+const RISK={b0:-0.8,A:-0.8,P:-0.5,S:-0.4,E:0.1,mid:0.35,high:0.6};
+function risk(t,i){
+  const d=D[t][i],assessment=(d[3]+d[4])/2;
+  const used={A:true,P:t>0,S:t>0&&D[t-1][i][1]>=MINR&&st.riskSete,E:true};
+  const A=(assessment-75)/10;
+  const P=used.P?(D[t-1][i][2]-85)/10:0;
+  const sete=used.S?comp(t-1,[i]):null;
+  const S=used.S?(sete-4.0)/0.5:0;
+  const E=(d[0]-35)/10;
+  const contributions=[
+    {key:'A',value:RISK.A*A,text:`Assessment average so far is ${assessment.toFixed(1)}% (target 75%)`},
+    ...(used.P?[{key:'P',value:RISK.P*P,text:`Previous semester passing rate was ${D[t-1][i][2]}%` }]:[]),
+    ...(used.S?[{key:'S',value:RISK.S*S,text:`Last semester's SETE composite was ${sete.toFixed(2)} (target 4.0)`}]:[]),
+    {key:'E',value:RISK.E*E,text:`Large class (${d[0]} students)`}
+  ];
+  const z=RISK.b0+contributions.reduce((total,c)=>total+c.value,0);
+  const p=1/(1+Math.exp(-z));
+  const level=p>=RISK.high?'High':p>=RISK.mid?'Moderate':'Low';
+  const driverContributions=contributions.filter(c=>c.value>0.1).sort((a,b)=>b.value-a.value);
+  const selectedDrivers=driverContributions.slice(0,2);
+  const seteDriver=driverContributions.find(c=>c.key==='S');
+  if(seteDriver&&!selectedDrivers.includes(seteDriver)){
+    if(selectedDrivers.length===2)selectedDrivers[1]=seteDriver;
+    else selectedDrivers.push(seteDriver);
+    selectedDrivers.sort((a,b)=>b.value-a.value);
+  }
+  const drivers=selectedDrivers.map(c=>c.text);
+  return {p,level,drivers,used};
+}
+const cv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let charts=[];
+let prevK={},prevS={},prevRisk={},lastDetailKey='',lastDetailMode='';
+let previousAlertsHTML=null;
+const kpiFrames={};
+function mk(i,cfg){
+  const canvas=$(['c1','c2','c3'][i]);
+  let chart=charts[i],duration=chart?250:600;
+  if(i===1&&chart&&chart.data.datasets.length!==cfg.data.datasets.length){
+    chart.destroy();
+    charts[i]=null;
+    chart=null;
+    duration=250;
+  }
+  cfg.options.animation={duration:REDUCED?0:duration,easing:'easeOutQuart'};
+  if(chart){
+    chart.data=cfg.data;
+    chart.options=cfg.options;
+    chart.update();
+  }else{
+    charts[i]=new Chart(canvas,cfg);
+  }
+}
+function animateKpis(K){
+  const intro=$('app').classList.contains('intro');
+  KP.forEach(P=>{
+    const value=K[P.k],card=document.querySelector(`.kpi[data-k="${P.k}"]`);
+    if(kpiFrames[P.k])cancelAnimationFrame(kpiFrames[P.k]);
+    delete kpiFrames[P.k];
+    if(value==null){
+      delete prevK[P.k];
+    }else{
+      const start=prevK[P.k]??0,end=value,node=card.querySelector('.v');
+      if(REDUCED||start===end){
+        node.textContent=P.f(end);
+      }else{
+        const began=performance.now(),duration=intro?500:300;
+        const step=now=>{
+          const progress=Math.min((now-began)/duration,1);
+          const eased=1-Math.pow(1-progress,4);
+          node.textContent=P.f(start+(end-start)*eased);
+          if(progress<1)kpiFrames[P.k]=requestAnimationFrame(step);
+          else{node.textContent=P.f(end);delete kpiFrames[P.k]}
+        };
+        kpiFrames[P.k]=requestAnimationFrame(step);
+      }
+      prevK[P.k]=value;
+    }
+    const currentStatus=status(value,P);
+    if(prevS[P.k]!==undefined&&prevS[P.k]!==currentStatus&&!intro&&!REDUCED){
+      card.classList.add('status-changed');
+      card.addEventListener('animationend',event=>{
+        if(event.target===card)card.classList.remove('status-changed');
+      },{once:true});
+    }
+    prevS[P.k]=currentStatus;
+  });
+}
+function syncKpiPressed(isOpen=$('drawer').classList.contains('open')){
+  const selected=!isOpen?'':st.mode==='kpi'?st.kpi:'';
+  document.querySelectorAll('.kpi').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.k===selected));
+  });
+}
+function openDrawer(mode,id,trigger){
+  const drawer=$('drawer'),scrim=$('scrim');
+  if(drawer.hidden){
+    drawerTrigger=trigger;
+    drawer.hidden=false;
+    scrim.hidden=false;
+    document.body.classList.add('drawer-open');
+    requestAnimationFrame(()=>{
+      drawer.classList.add('open');
+      scrim.classList.add('open');
+    });
+  }else if(!drawer.classList.contains('open')){
+    drawerTrigger=trigger;
+    document.body.classList.add('drawer-open');
+    requestAnimationFrame(()=>{
+      drawer.classList.add('open');
+      scrim.classList.add('open');
+    });
+  }
+  if(mode==='kpi'){st.mode='kpi';st.kpi=id;st.secIdx=null}
+  else{st.mode='sec';st.secIdx=Number(id)}
+  syncKpiPressed();
+  detail(T(),idxs());
+  syncKpiPressed(true);
+  document.querySelector('.drawer-close').focus();
+}
+function closeDrawer(restoreFocus=true){
+  const drawer=$('drawer'),scrim=$('scrim');
+  if(drawer.hidden)return;
+  drawer.classList.remove('open');
+  scrim.classList.remove('open');
+  document.body.classList.remove('drawer-open');
+  syncKpiPressed();
+  const trigger=drawerTrigger;
+  drawerTrigger=null;
+  let closed=false;
+  const hide=()=>{
+    if(closed)return;
+    closed=true;
+    drawer.hidden=true;
+    scrim.hidden=true;
+    drawer.removeEventListener('transitionend',onTransitionEnd);
+    if(restoreFocus){
+      let target=trigger&&trigger.isConnected?trigger:null;
+      if(!target&&trigger?.matches('.kpi'))target=document.querySelector(`.kpi[data-k="${st.kpi}"]`);
+      target?.focus({preventScroll:true});
+    }
+  };
+  const onTransitionEnd=event=>{
+    if(event.target===drawer&&event.propertyName==='transform'&&!drawer.classList.contains('open'))hide();
+  };
+  if(REDUCED){hide();return}
+  drawer.addEventListener('transitionend',onTransitionEnd);
+  setTimeout(()=>{if(!drawer.classList.contains('open'))hide()},250);
+}
+$('scrim').onclick=()=>closeDrawer();
+document.querySelector('.drawer-close').onclick=()=>closeDrawer();
+document.addEventListener('keydown',event=>{
+  const drawer=$('drawer');
+  if(drawer.hidden)return;
+  if(event.key==='Escape'){event.preventDefault();closeDrawer();return}
+  if(event.key!=='Tab')return;
+  const focusable=[...drawer.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>!el.hidden);
+  if(!focusable.length||!drawer.contains(document.activeElement)){event.preventDefault();focusable.length?focusable[0].focus():document.querySelector('.drawer-close').focus();return}
+  const first=focusable[0],last=focusable[focusable.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+});
+
+function fillSelects(){
+  const subs=['All',...new Set(SEC.map(s=>s.n))];
+  $('fSub').innerHTML=subs.map(s=>`<option value="${s}" ${s===st.sub?'selected':''}>${s==='All'?'All subjects':s}</option>`).join('');
+  const secs=['All',...SEC.filter(s=>st.sub==='All'||s.n===st.sub).map(s=>s.s)];
+  $('fSec').innerHTML=secs.map(s=>`<option value="${s}" ${s===st.sec?'selected':''}>${s==='All'?'All sections':s}</option>`).join('');
+}
+
+function riskCard(t,ix){
+  const rows=ix.map(i=>({i,...risk(t,i)})).sort((a,b)=>b.p-a.p);
+  const labels={High:'bad',Moderate:'warn',Low:'ok'};
+  const actions={
+    High:'Plan a review session and refer struggling students for tutoring now.',
+    Moderate:'Check the low-scoring topics and watch the next assessment.',
+    Low:'No action needed. Keep monitoring.'
+  };
+  $('risk').innerHTML=`<div class="card-head risk-card-head"><div class="card-icon" style="--group-tint:var(--line);--group-color:var(--ink);">${ico('activity',18)}</div><div class="card-title risk-card-heading"><h2>Section risk</h2><p class="sub">Estimated chance of finishing below 75% passing, by section, ${TERMS[t]}</p>${st.riskSete?'':'<p class="risk-sete-helper">SETE is turned off, so this estimate uses assessment results, previous passing rate, and class size only.</p>'}</div><button type="button" role="switch" aria-checked="${st.riskSete}" id="riskSeteSwitch" class="risk-sete-switch"><span class="switch-track"><span class="switch-thumb"></span></span><span class="switch-label">Use SETE in this estimate</span></button></div>`+
+    (rows.length?`<div class="risk-rows">${rows.map(row=>{
+      const notes=t===0?['No previous semester to compare']:!st.riskSete?['SETE turned off']:D[t-1][row.i][1]<MINR?['SETE not used (fewer than 5 respondents last semester)']:[];
+      const drivers=row.drivers.length?row.drivers.join('; '):'No factors raising the risk';
+      const about=Math.round(row.p*100/5)*5;
+      const previous=prevRisk[row.i];
+      const meterStart=REDUCED||previous===row.p?row.p:(previous??0);
+      return `<button type="button" class="risk-row" data-risk-section="${row.i}"><span class="risk-row-name">${secName(row.i)}</span><span class="tag ${labels[row.level]}">${row.level} risk</span><span class="risk-row-about">About ${about}%</span><span class="risk-row-drivers">${drivers}</span>${notes.length?`<span class="risk-row-notes">${notes.join('; ')}</span>`:''}<span class="risk-row-action">${actions[row.level]}</span><span class="risk-row-chevron">View section details ${ico('chevron',16)}</span><span class="risk-meter" aria-hidden="true"><i style="--s:${meterStart}"></i></span></button>`;
+    }).join('')}</div>`:'<p class="risk-empty">No sections selected.</p>')+
+    `<p class="risk-footer">Support signal, not an evaluation of the teacher. Illustrative model for this demo. Any decision about a faculty member needs human review.</p><details class="risk-disclosure"><summary>How this estimate works</summary><p><b>Method:</b> Logistic regression (classification). The output is an estimate of the chance that the section ends below 75% passing. It is used to rank sections by level of concern and is not a calibrated probability.</p><p><b>Levels:</b> Low below 35%, Moderate 35% to 59%, High 60% or more.</p><p><b>Inputs:</b> Assessment average so far, previous semester passing rate, the section's SETE composite from the previous semester (only with 5 or more respondents, and it can be switched off), and enrollment size. The current passing rate is not used, because it is the outcome being estimated.</p><p><b>How the numbers were set:</b> The weights in this demo are fixed and chosen by hand to illustrate the output. With only 16 section-semester rows, a model cannot be trained responsibly. A real version would be trained on earlier semesters of Portal and SETE data, tested on the most recent semester, and checked against real outcomes.</p><p><b>Proof of concept:</b> A separate experiment trained the same kind of model on the public UCI Student Performance dataset. On a held-out test of 99 students it caught 30 of 33 at-risk students. This shows the method can be measured. It does not validate the numbers on this page.</p><p><b>Fairness:</b> SETE can be affected by grading leniency, class size and required versus elective courses. Here it counts only with 5 or more respondents and carries about half the weight of the assessment average. When every other input is on target, a below-target SETE rating alone can move a section to Moderate, and to High only if the rating is about 2.5 out of 5 or lower.</p></details>`;
+  rows.forEach(row=>{prevRisk[row.i]=row.p});
+  if(!REDUCED)requestAnimationFrame(()=>rows.forEach(row=>{
+    if(prevRisk[row.i]!==row.p)return;
+    const meter=$('risk').querySelector(`[data-risk-section="${row.i}"] .risk-meter i`);
+    if(meter&&meter.style.getPropertyValue('--s')!==String(row.p))meter.style.setProperty('--s',row.p);
+  }));
+  else rows.forEach(row=>{
+    const meter=$('risk').querySelector(`[data-risk-section="${row.i}"] .risk-meter i`);
+    if(meter)meter.style.setProperty('--s',row.p);
+  });
+  $('risk').querySelectorAll('[data-risk-section]').forEach(button=>button.onclick=()=>{
+    openDrawer('sec',button.dataset.riskSection,button);
+  });
+  $('riskSeteSwitch').onclick=()=>{
+    st.riskSete=!st.riskSete;
+    riskCard(T(),idxs());
+    $('riskSeteSwitch').focus({preventScroll:true});
+  };
+}
+
+function render(){
+  const t=T(),ix=idxs();
+  if(st.mode==='sec'&&!ix.includes(st.secIdx)){st.mode='kpi';st.secIdx=null}
+  if(st.mode==='sec'&&st.secIdx==null)st.secIdx=ix[0]??null;
+  const K=kpis(t,ix);
+  const al=[];
+  if(ix.length>1 && K.k1!=null && K.k1 < 85) al.push(['bad','Grade submission timeliness '+K.k1.toFixed(0)+'% is below 85%','Grades']);
+  ix.forEach(i=>{
+    const d=D[t][i],nm=secName(i);
+    // Any late grade sheet in the selected semester is an alert. Do not add a consecutive-semester condition.
+    if(d[5]===0)al.push(['bad','Grade sheet submitted late: '+nm,'Grades']);
+    if(d[2]<75)al.push(['bad','Passing rate '+d[2]+'% is below 75%: '+nm,'Grades']);
+    if((d[3]+d[4])/2<65)al.push(['bad','Average assessment score '+((d[3]+d[4])/2).toFixed(1)+'% is below 65%: '+nm,'Grades']);
+    if(d[1]<MINR)al.push(['warn','SETE results hidden, fewer than 5 respondents ('+d[1]+'): '+nm,'SETE']);
+    else if(t>0){const a=comp(t,[i]),b=comp(t-1,[i]);if(a!=null&&b!=null&&a<3.5&&b<3.5)al.push(['bad','SETE below 3.5 for two consecutive semesters: '+nm,'SETE']);}
+  });
+  const alertHTML=al.length?al.map(a=>`<li><span class="alert-badge ${a[0]}">${a[0]==='bad'?ico('alert',14):a[0]==='warn'?ico('info',14):ico('checkCircle',14)}</span><span class="tag ${a[0]}">${a[0]==='bad'?ico('alert',12):ico('info',12)}${a[0]==='bad'?'Alert':'Notice'}</span><span class="g-chip" style="--group-color:${a[2]==='Grades'?'var(--g-grades)':'var(--g-sete)'};--group-tint:${a[2]==='Grades'?'var(--g-grades-tint)':'var(--g-sete-tint)'};">${ico(a[2]==='Grades'?'book':'star',12)}${a[2]}</span><span>${a[1]}</span></li>`).join(''):'<li><span class="alert-badge ok">'+ico('checkCircle',14)+'</span><span class="tag ok">'+ico('checkCircle',12)+'Clear</span><span>No alerts for this selection.</span></li>';
+  if(alertHTML!==previousAlertsHTML){
+    const alertList=$('alerts'),intro=$('app').classList.contains('intro');
+    alertList.classList.remove('swap');
+    alertList.innerHTML=alertHTML;
+    if(previousAlertsHTML!==null&&!intro){
+      void alertList.offsetWidth;
+      alertList.classList.add('swap');
+      alertList.addEventListener('animationend',event=>{
+        if(event.target===alertList)alertList.classList.remove('swap');
+      },{once:true});
+    }
+    previousAlertsHTML=alertHTML;
+  }
+  $('kpis').innerHTML=KP.map(P=>{
+    const v=K[P.k],s=status(v,P);
+    let note=P.tg;
+    if(P.k==='k1'&&v!=null)note=ix.filter(i=>D[t][i][5]).length+' of '+ix.length+' grade sheets on time';
+    if(P.k==='k3'&&v!=null)note='Based on '+sum(okR(t,ix).map(i=>D[t][i][1]))+' of '+sum(ix.map(i=>D[t][i][0]))+' students';
+    if(P.k==='k5'&&v==null)note='Needs two semesters of data';
+    const gTint=P.g==='Grades'?'var(--g-grades-tint)':'var(--g-sete-tint)';
+    const gColor=P.g==='Grades'?'var(--g-grades)':'var(--g-sete)';
+    const iconName=P.k==='k1'?'clock':P.k==='k2'?'userCheck':P.k==='k4'?'clipboard':P.k==='k3'?'star':'trendingUp';
+    const groupIcon=P.g==='Grades'?'book':'star';
+    return `<button class="kpi ${s}" data-k="${P.k}" aria-pressed="${$('drawer').classList.contains('open')&&st.mode==='kpi'&&st.kpi===P.k}" style="--group-tint:${gTint};--group-color:${gColor};"><span class="kpi-top"><span class="kpi-icon">${ico(iconName,20)}</span><span class="g-chip" style="--group-color:${gColor};--group-tint:${gTint};">${ico(groupIcon,12)}${P.g}</span></span><span class="v">${v==null?'n/a':P.f(v)}</span><span class="n">${P.n}</span><span class="s"><span class="tag ${s}">${LBL[s]}</span> ${note}</span><span class="kpi-more">${ico('chevron',14)} View breakdown</span></button>`;
+  }).join('');
+  animateKpis(K);
+  document.querySelectorAll('.kpi').forEach(b=>b.onclick=()=>openDrawer('kpi',b.dataset.k,b));
+  const mut=cv('--mut'),grid=cv('--line'),acc=cv('--accent'),seteAcc=cv('--g-sete-chart'),gray=cv('--gray');
+  Chart.defaults.color=mut;Chart.defaults.font.family='"Poppins",system-ui,sans-serif';
+  const sc=(min,max)=>({min,max,grid:{color:grid},ticks:{color:mut}});
+  const tl=TERMS.slice(0,t+1);
+  mk(0,{type:'line',data:{labels:tl,datasets:[
+    {label:'SETE composite',data:tl.map((_,i)=>comp(i,ix)),borderColor:seteAcc,backgroundColor:seteAcc,borderWidth:3,pointRadius:5,tension:.25},
+    {label:'Target 4.0',data:tl.map(()=>4),borderColor:cv('--ok'),borderDash:[6,5],pointRadius:0,borderWidth:2},
+    {label:'Warning 3.5',data:tl.map(()=>3.5),borderColor:cv('--bad'),borderDash:[2,4],pointRadius:0,borderWidth:2}]},
+    options:{maintainAspectRatio:false,scales:{y:sc(3,5),x:{grid:{display:false}}},plugins:{legend:{position:'bottom'}}}});
+  const cur=crit(t,ix),prev=t>0?crit(t-1,ix):null;
+  $('c2sub').textContent=cur[0]==null?'Hidden: fewer than 5 respondents':'Current semester'+(prev?' compared with the previous one':'');
+  mk(1,{type:'bar',data:{labels:CR,datasets:[
+    ...(prev?[{label:TERMS[t-1],data:prev,backgroundColor:gray}]:[]),
+    {label:TERMS[t],data:cur,backgroundColor:seteAcc}]},
+    options:{maintainAspectRatio:false,scales:{y:sc(1,5),x:{grid:{display:false},ticks:{color:mut,maxRotation:0,autoSkip:false,font:{size:ctx=>ctx.chart.width<400?9:12},callback(v){const l=this.getLabelForValue(v);if(this.chart.width<400){const narrow={'Subject mastery':['Subject','mastery'],'Teaching methods':['Teach.','methods'],'Classroom management':['Class.','mgmt.'],'Communication':['Communi-','cation'],'Student engagement':['Student','engage.']};return narrow[l]}return l.split(' ')}}}},plugins:{legend:{position:'bottom'}}}});
+  mk(2,{type:'bar',data:{labels:ix.map(i=>[SEC[i].c,SEC[i].s]),datasets:[
+    {label:'Passing rate %',data:ix.map(i=>D[t][i][2]),backgroundColor:acc},
+    {label:'Average assessment score %',data:ix.map(i=>(D[t][i][3]+D[t][i][4])/2),backgroundColor:gray}]},
+    options:{maintainAspectRatio:false,scales:{y:sc(0,100),x:{grid:{display:false}}},plugins:{legend:{position:'bottom'}},
+      onClick(e,els){if(els.length)openDrawer('sec',ix[els[0].index],$('c3'))},
+      onHover(e,els){e.native.target.style.cursor=els.length?'pointer':'default'}}});
+  riskCard(t,ix);
+  detail(t,ix);
+}
+
+function detail(t,ix){
+  const el=$('drawerBody'),P=KP.find(p=>p.k===st.kpi)||KP[0];
+  if(st.mode==='sec'&&!ix.includes(st.secIdx)){st.mode='kpi';st.secIdx=null}
+  const key=st.mode+':'+st.kpi+':'+st.secIdx;
+  const modeChanged=lastDetailMode!==''&&lastDetailMode!==st.mode;
+  const intro=$('app').classList.contains('intro');
+  const detailClass=key!==lastDetailKey&&lastDetailKey&&!intro&&!REDUCED
+    ?modeChanged?(st.mode==='sec'?'detail-from-right':'detail-from-left'):'detail-fade':'';
+  const selectedSection=st.mode==='sec'?st.secIdx:null;
+  const subtitle=st.mode==='kpi'?`${P.n} by section, ${TERMS[t]}`:ix.includes(selectedSection)?`${SEC[selectedSection].n}, ${SEC[selectedSection].s}, ${TERMS[t]}`:`No sections match the current filters, ${TERMS[t]}`;
+  const modeSwitch=`<div class="mode-switch" role="group" aria-label="Details view"><button type="button" data-mode="kpi" aria-pressed="${st.mode==='kpi'}">By KPI</button><button type="button" data-mode="sec" aria-pressed="${st.mode==='sec'}">By section</button></div>`;
+  const picker=st.mode==='kpi'
+    ?KP.map(item=>`<button type="button" data-kpi="${item.k}" aria-pressed="${st.kpi===item.k}">${item.n}</button>`).join('')
+    :ix.map(i=>`<button type="button" data-section="${i}" aria-pressed="${selectedSection===i}">${secName(i)}</button>`).join('');
+  let content='';
+  if(st.mode==='kpi'){
+    content=`<table><thead><tr><th>Section</th><th>Value</th><th>Status</th><th><span class="sr-only">Open details</span></th></tr></thead><tbody>`+
+      ix.map(i=>{const v=kpis(t,[i])[P.k],q=status(v,P),value=v==null?'n/a':P.k==='k1'?(v?'On time':'Late'):P.f(v);return `<tr class="detail-row" data-section-row="${i}" tabindex="0" role="button" aria-label="View ${SEC[i].n}, ${SEC[i].s} details"><td>${SEC[i].n}, ${SEC[i].s}</td><td>${value}</td><td><span class="tag ${q}">${LBL[q]}</span></td><td>${ico('chevron',16)}</td></tr>`}).join('')+'</tbody></table>';
+  }else if(selectedSection!=null){
+    const d=D[t][selectedSection],hid=d[1]<MINR;
+    content=`<div class="stats"><div><b>${d[0]}</b>Enrolled</div><div><b>${d[1]}</b>SETE respondents</div><div><b>${d[2]}%</b>Passing rate</div><div><b>${d[3]}%</b>Activities average</div><div><b>${d[4]}%</b>Exams average</div><div><b>${d[5]?'On time':'Late'}</b>Grade sheet</div></div>
+    <h2>SETE rating per criterion</h2>`+(hid?'<p class="sub">Hidden: fewer than 5 students answered the evaluation.</p>':CR.map((c,k)=>`<div class="meter"><span>${c}</span><i><span style="width:${d[6+k]/5*100}%"></span></i><b>${d[6+k].toFixed(1)}</b></div>`).join(''));
+  }else{
+    content='<p class="detail-empty">No sections match the current filters.</p>';
+  }
+  $('drawerSubtitle').textContent=subtitle;
+  el.innerHTML=`<div class="drawer-content ${detailClass}"><div class="detail-toolbar">${modeSwitch}<div class="picker" aria-label="${st.mode==='kpi'?'Choose KPI':'Choose section'}">${picker}</div></div>${content}</div>`;
+  const animatedContent=el.querySelector('.drawer-content');
+  if(detailClass)animatedContent.addEventListener('animationend',event=>{
+    if(event.target===animatedContent)animatedContent.classList.remove(detailClass);
+  },{once:true});
+  lastDetailKey=key;
+  lastDetailMode=st.mode;
+  syncKpiPressed();
+  el.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>{
+    st.mode=button.dataset.mode;
+    if(st.mode==='sec'&&st.secIdx==null)st.secIdx=ix[0]??null;
+    detail(T(),idxs());
+    el.querySelector(`[data-mode="${st.mode}"]`)?.focus();
+  });
+  el.querySelectorAll('[data-kpi]').forEach(button=>button.onclick=()=>{
+    st.mode='kpi';st.kpi=button.dataset.kpi;detail(T(),idxs());
+    el.querySelector(`[data-kpi="${st.kpi}"]`)?.focus();
+  });
+  el.querySelectorAll('[data-section]').forEach(button=>button.onclick=()=>{
+    st.mode='sec';st.secIdx=Number(button.dataset.section);detail(T(),idxs());
+    el.querySelector(`[data-section="${st.secIdx}"]`)?.focus();
+  });
+  el.querySelectorAll('[data-section-row]').forEach(row=>{
+    const selectSection=()=>{
+      st.mode='sec';st.secIdx=Number(row.dataset.sectionRow);detail(T(),idxs());
+      el.querySelector(`[data-section="${st.secIdx}"]`)?.focus();
+    };
+    row.onclick=selectSection;
+    row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectSection()}};
+  });
+}
+
+$('fAy').onchange=$('fSem').onchange=()=>render();
+$('fSub').onchange=e=>{st.sub=e.target.value;st.sec='All';fillSelects();render()};
+$('fSec').onchange=e=>{st.sec=e.target.value;render()};
+let appIntroTimer=null,landingIntroTimer=null;
+function show(d,scrollTarget=null){
+  const landing=$('landing'),app=$('app');
+  if(!d)closeDrawer(false);
+  landing.hidden=d;app.hidden=!d;
+  const page=d?$('app'):$('landing');
+  page.classList.remove('page-enter');
+  void page.offsetWidth;
+  page.classList.add('page-enter');
+  const removePageIntro=event=>{
+    if(event.target!==page)return;
+    page.classList.remove('page-enter');
+    page.removeEventListener('animationend',removePageIntro);
+  };
+  page.addEventListener('animationend',removePageIntro);
+  if(d){
+    clearTimeout(appIntroTimer);
+    clearTimeout(landingIntroTimer);
+    landing.classList.remove('landing-intro');
+    app.classList.remove('intro');
+    app.classList.add('intro');
+    appIntroTimer=setTimeout(()=>app.classList.remove('intro'),1000);
+    charts.forEach(chart=>chart.destroy());
+    charts=[];
+    Object.values(kpiFrames).forEach(cancelAnimationFrame);
+    Object.keys(kpiFrames).forEach(key=>delete kpiFrames[key]);
+    prevK={};prevS={};prevRisk={};lastDetailKey='';lastDetailMode='';
+    previousAlertsHTML=null;
+    $('alerts').classList.remove('swap');
+    render();
+  }else{
+    clearTimeout(appIntroTimer);
+    clearTimeout(landingIntroTimer);
+    app.classList.remove('intro');
+    landing.classList.remove('landing-intro');
+    void landing.offsetWidth;
+    landing.classList.add('landing-intro');
+    landingIntroTimer=setTimeout(()=>landing.classList.remove('landing-intro'),1000);
+  }
+  if(scrollTarget){
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      $(scrollTarget).scrollIntoView({behavior:REDUCED?'auto':'smooth',block:'start'});
+    }));
+  }else window.scrollTo({top:0,behavior:'smooth'});
+}
+function route(){show(location.hash==='#dashboard')}
+document.addEventListener('click',e=>{const home=e.target.closest('button[data-home]');if(home){try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}show(false);return}const a=e.target.closest('a[href^="#"]');if(!a)return;e.preventDefault();const d=a.getAttribute('href')==='#dashboard';try{history.replaceState(null,'',d?'#dashboard':location.pathname+location.search)}catch(_){}show(d,a.hasAttribute('data-scroll-risk')?'risk':null)});
+window.addEventListener('hashchange',route);
+fillSelects();route();
+</script>
+</body>
+</html>
